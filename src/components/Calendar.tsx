@@ -11,12 +11,14 @@ import {
   TableCell,
   TableBody,
   Typography,
-  Button,
   IconButton,
   TableFooter,
 } from '@material-ui/core';
 import _ from 'lodash';
-import { ArrowLeftRounded, ArrowRightRounded } from '@material-ui/icons';
+import {
+  KeyboardArrowRightRounded,
+  KeyboardArrowLeftRounded,
+} from '@material-ui/icons';
 
 const WEEKDAYS = [
   { idx: 1, type: 'SUN' },
@@ -63,6 +65,7 @@ const Calendar: FC = () => {
   const [date, setDate] = useState(new Date());
   const classes = useStyles();
   const daysOfThisMonth = createCalendarArray(_.cloneDeep(date));
+  let daycolor = 'dimgrey';
 
   return (
     <Table
@@ -80,11 +83,16 @@ const Calendar: FC = () => {
       <TableBody>
         {daysOfThisMonth.map((week) => (
           <StyledTableRow>
-            {week.map((day) => (
-              <StyledTableCell key={day.toString()} align="center">
-                <Typography variant="button">{day.getDate()}</Typography>
-              </StyledTableCell>
-            ))}
+            {week.map((day) => {
+              daycolor = getColorOfDateCharacter(date, day);
+              return (
+                <StyledTableCell key={day.toString()} align="center">
+                  <Typography variant="button" style={{ color: daycolor }}>
+                    {day.getDate()}
+                  </Typography>
+                </StyledTableCell>
+              );
+            })}
           </StyledTableRow>
         ))}
       </TableBody>
@@ -96,11 +104,11 @@ const Calendar: FC = () => {
               size="small"
               onClick={() => setDate(getFormerEOrNextMont(-1, date))}
             >
-              <ArrowLeftRounded />
+              <KeyboardArrowLeftRounded />
             </IconButton>
           </TableCell>
           <TableCell colSpan={2} align="center">
-            <Typography variant="button">
+            <Typography component="h3">
               {`${date.getFullYear()}/${date.getMonth() + 1}`}
             </Typography>
           </TableCell>
@@ -109,7 +117,7 @@ const Calendar: FC = () => {
               size="small"
               onClick={() => setDate(getFormerEOrNextMont(1, date))}
             >
-              <ArrowRightRounded />
+              <KeyboardArrowRightRounded />
             </IconButton>
           </TableCell>
         </TableRow>
@@ -143,6 +151,10 @@ const createCalendarArray = (date: Date) => {
 const getFormerEOrNextMont = (i: number, date: Date) => {
   date.setMonth(date.getMonth() + i);
   return _.cloneDeep(date);
+};
+
+const getColorOfDateCharacter = (date: Date, day: Date): string => {
+  return date.getMonth() === day.getMonth() ? 'grey' : 'silver';
 };
 
 export default Calendar;
