@@ -19,26 +19,19 @@ import {
   KeyboardArrowRightRounded,
   KeyboardArrowLeftRounded,
 } from '@material-ui/icons';
-
-const WEEKDAYS = [
-  { idx: 1, type: 'SUN' },
-  { idx: 2, type: 'MON' },
-  { idx: 3, type: 'TUE' },
-  { idx: 4, type: 'WED' },
-  { idx: 5, type: 'THU' },
-  { idx: 6, type: 'FRI' },
-  { idx: 7, type: 'SAT' },
-];
+import { WEEKDAYS } from '../constants/Week';
 
 const StyledTableCell = withStyles((theme: Theme) =>
   createStyles({
     head: {
+      width: theme.spacing(6),
       backgroundColor: theme.palette.grey[500],
       color: theme.palette.common.white,
       border: theme.palette.common.white,
       fontSize: 12,
     },
     body: {
+      width: theme.spacing(6),
       fontSize: 12,
     },
   }),
@@ -54,18 +47,31 @@ const StyledTableRow = withStyles((theme: Theme) =>
   }),
 )(TableRow);
 
-const useStyles = makeStyles({
-  table: {
-    minWidth: 300,
-    width: 400,
-  },
-});
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    table: {
+      minWidth: 300,
+      width: 400,
+    },
+    small: {
+      margin: theme.spacing(0),
+      width: theme.spacing(3),
+      height: theme.spacing(3),
+      fontSize: 14,
+      textAlign: 'center',
+      backgroundColor: 'royalblue',
+    },
+  }),
+);
 
-const Calendar: FC = () => {
-  const [date, setDate] = useState(new Date());
+interface Props {
+  calendarArr: Date[][];
+  date: Date;
+  getMonth: (plusNum: number, today: Date) => void;
+}
+
+const Calendar: FC<Props> = ({ calendarArr, date = new Date(), getMonth }) => {
   const classes = useStyles();
-  const daysOfThisMonth = createCalendarArray(_.cloneDeep(date));
-  let daycolor = 'dimgrey';
 
   return (
     <Table
@@ -81,18 +87,13 @@ const Calendar: FC = () => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {daysOfThisMonth.map((week) => (
+        {calendarArr.map((week) => (
           <StyledTableRow>
-            {week.map((day) => {
-              daycolor = getColorOfDateCharacter(date, day);
-              return (
-                <StyledTableCell key={day.toString()} align="center">
-                  <Typography variant="button" style={{ color: daycolor }}>
-                    {day.getDate()}
-                  </Typography>
-                </StyledTableCell>
-              );
-            })}
+            {week.map((day) => (
+              <StyledTableCell key={day.toString()} align="center">
+                {day.getDate()}
+              </StyledTableCell>
+            ))}
           </StyledTableRow>
         ))}
       </TableBody>
@@ -100,10 +101,7 @@ const Calendar: FC = () => {
         <TableRow>
           <TableCell colSpan={3} />
           <TableCell>
-            <IconButton
-              size="small"
-              onClick={() => setDate(getFormerEOrNextMont(-1, date))}
-            >
+            <IconButton size="small" onClick={() => getMonth(-1, date)}>
               <KeyboardArrowLeftRounded />
             </IconButton>
           </TableCell>
@@ -113,10 +111,7 @@ const Calendar: FC = () => {
             </Typography>
           </TableCell>
           <TableCell>
-            <IconButton
-              size="small"
-              onClick={() => setDate(getFormerEOrNextMont(1, date))}
-            >
+            <IconButton size="small" onClick={() => getMonth(1, date)}>
               <KeyboardArrowRightRounded />
             </IconButton>
           </TableCell>
@@ -124,37 +119,6 @@ const Calendar: FC = () => {
       </TableFooter>
     </Table>
   );
-};
-
-const createCalendarArray = (date: Date) => {
-  date.setDate(1);
-
-  const weekTypeOfFirstDay = WEEKDAYS[date.getDay()];
-
-  const dayTypeCount = weekTypeOfFirstDay.idx;
-  date.setDate(date.getDate() - dayTypeCount);
-  let calendarArr = [];
-  let weekArr = [];
-
-  for (let i = 1; i <= 42; i++) {
-    date.setDate(date.getDate() + 1);
-    weekArr.push(_.cloneDeep(date));
-
-    if (i % 7 === 0) {
-      calendarArr.push(weekArr);
-      weekArr = [];
-    }
-  }
-  return calendarArr;
-};
-
-const getFormerEOrNextMont = (i: number, date: Date) => {
-  date.setMonth(date.getMonth() + i);
-  return _.cloneDeep(date);
-};
-
-const getColorOfDateCharacter = (date: Date, day: Date): string => {
-  return date.getMonth() === day.getMonth() ? 'grey' : 'silver';
 };
 
 export default Calendar;
