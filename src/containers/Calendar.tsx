@@ -2,39 +2,58 @@ import React, { FC, useState, useEffect } from 'react';
 import { Dispatch } from 'redux';
 import _ from 'lodash';
 import { WEEKDAYS } from '../constants/Week';
-import Calendar from '../components/Calendar';
+import CalendarComponent from '../components/Calendar';
 
 const useCalendarInfo = (
   today: Date,
   initialCalendarArr: Date[][],
-): [Date[][], Date, (plusNum: number, today: Date) => void] => {
+): [Date[][], Date, () => void, () => void, () => void] => {
   const [date, setDate] = useState(today);
   const [calendarArr, setCalendar] = useState(initialCalendarArr);
 
-  const getMonth = (i: number, baseDate: Date) => {
-    baseDate.setMonth(baseDate.getMonth() + i);
-    setDate(baseDate);
-  };
+  const calendarIncrement = () =>
+    setDate(
+      (prevDate) =>
+        new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1),
+    );
+  const calendarDecrement = () =>
+    setDate(
+      (prevDate) =>
+        new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1),
+    );
+
+  const reset = () => setDate(today);
 
   useEffect(() => {
     const makeArr = () => {
       const calendarArrByDate = createCalendarArray(date);
-      setCalendar(calendarArrByDate)
-    }
-    makeArr()
+      setCalendar(calendarArrByDate);
+    };
+    makeArr();
   }, [date]);
 
-  return [calendarArr, date, getMonth];
+  return [calendarArr, date, calendarIncrement, calendarDecrement, reset];
 };
 
 const CalendarContainer: FC = () => {
   const today = new Date();
   const initialCalendarArr = createCalendarArray(today);
-  const [calendarArr, date, getMonth] = useCalendarInfo(
-    today,
-    initialCalendarArr,
+  const [
+    calendarArr,
+    date,
+    calendarIncrement,
+    calendarDecrement,
+    reset,
+  ] = useCalendarInfo(today, initialCalendarArr);
+  return (
+    <CalendarComponent
+      calendarArr={calendarArr}
+      date={date}
+      calendarIncrement={calendarIncrement}
+      calendarDecrement={calendarDecrement}
+      reset={reset}
+    />
   );
-  return <Calendar calendarArr={calendarArr} date={date} getMonth={getMonth} />;
 };
 
 const createCalendarArray = (date: Date) => {
@@ -58,18 +77,6 @@ const createCalendarArray = (date: Date) => {
     }
   }
   return calendarArr;
-};
-
-const getColorOfDateCharacter = (date: Date, day: Date): string => {
-  return date.getMonth() === day.getMonth() ? 'grey' : 'silver';
-};
-
-const isToday = (today: Date, day: Date) => {
-  return (
-    today.getFullYear() === day.getFullYear() &&
-    today.getMonth() === day.getMonth() &&
-    today.getDate() === day.getDate()
-  );
 };
 
 export default CalendarContainer;
