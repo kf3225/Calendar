@@ -1,9 +1,9 @@
 export const WEEKDAYS = [
-  { idx: 1, type: 'SUN' },
-  { idx: 2, type: 'MON' },
-  { idx: 3, type: 'TUE' },
-  { idx: 4, type: 'WED' },
-  { idx: 5, type: 'THU' },
-  { idx: 6, type: 'FRI' },
-  { idx: 7, type: 'SAT' },
+  { idx: 1, type: '日' },
+  { idx: 2, type: '月' },
+  { idx: 3, type: '火' },
+  { idx: 4, type: '水' },
+  { idx: 5, type: '木' },
+  { idx: 6, type: '金' },
+  { idx: 7, type: '土' },
 ];

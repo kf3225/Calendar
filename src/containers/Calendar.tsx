@@ -7,9 +7,11 @@ import CalendarComponent from '../components/Calendar';
 const useCalendarInfo = (
   today: Date,
   initialCalendarArr: Date[][],
-): [Date[][], Date, () => void, () => void, () => void] => {
+): [Date[][], Date, Date, (date: Date) => void, () => void, () => void, () => void] => {
   const [date, setDate] = useState(today);
   const [calendarArr, setCalendar] = useState(initialCalendarArr);
+  const [WeekPlans, setWeekPlans] = useState(getWeekPlans(today));
+  const [selectedDate, setSelectedDate] = useState(today);
 
   const calendarIncrement = () =>
     setDate(
@@ -22,6 +24,8 @@ const useCalendarInfo = (
         new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1),
     );
 
+  const selectDate = (selectedDate: Date) => setSelectedDate(selectedDate);
+
   const reset = () => setDate(today);
 
   useEffect(() => {
@@ -30,9 +34,19 @@ const useCalendarInfo = (
       setCalendar(calendarArrByDate);
     };
     makeArr();
+
+    setWeekPlans(getWeekPlans(selectedDate))
   }, [date]);
 
-  return [calendarArr, date, calendarIncrement, calendarDecrement, reset];
+  return [
+    calendarArr,
+    date,
+    selectedDate,
+    selectDate,
+    calendarIncrement,
+    calendarDecrement,
+    reset,
+  ];
 };
 
 const CalendarContainer: FC = () => {
@@ -41,6 +55,8 @@ const CalendarContainer: FC = () => {
   const [
     calendarArr,
     date,
+    selectedDate,
+    selectDate,
     calendarIncrement,
     calendarDecrement,
     reset,
@@ -49,6 +65,7 @@ const CalendarContainer: FC = () => {
     <CalendarComponent
       calendarArr={calendarArr}
       date={date}
+      selectDate={selectDate}
       calendarIncrement={calendarIncrement}
       calendarDecrement={calendarDecrement}
       reset={reset}
@@ -77,6 +94,25 @@ const createCalendarArray = (date: Date) => {
     }
   }
   return calendarArr;
+};
+
+const getWeekPlans = (date: Date): Date[] => {
+  const baseDate = _.cloneDeep(date);
+  baseDate.setMonth(baseDate.getMonth() + 1);
+
+  const settingDate = (date: Date) => (num: number): Date => {
+    const cpDate = _.cloneDeep(date);
+    cpDate.setDate(cpDate.getDate() + num);
+    return cpDate;
+  };
+
+  return [
+    settingDate(baseDate)(-2),
+    settingDate(baseDate)(-1),
+    baseDate,
+    settingDate(baseDate)(1),
+    settingDate(baseDate)(2),
+  ];
 };
 
 export default CalendarContainer;

@@ -14,6 +14,7 @@ import {
   TableFooter,
   makeStyles,
   Button,
+  ThemeProvider,
 } from '@material-ui/core';
 import _ from 'lodash';
 import {
@@ -29,35 +30,89 @@ const styledTableCell = (date?: Date, today?: Date) => {
   return withStyles((theme: Theme) =>
     createStyles({
       head: {
-        backgroundColor: theme.palette.grey[greyNum],
-        color: theme.palette.common.white,
-        border: theme.palette.common.white,
         textAlign: 'center',
         fontSize: 12,
+        minWidth: '30px',
+        maxWidth: '30px',
+        minHeight: '50px',
+        maxHeigth: '50px',
+        padding: theme.spacing(0),
+        margin: theme.spacing(0),
       },
       body: {
         color: theme.palette.grey[greyNum],
         fontSize: 12,
         textAlign: 'center',
+        minWidth: '30px',
+        maxWidth: '30px',
+        minHeight: '30px',
+        maxHeigth: '30px',
         padding: theme.spacing(0),
+        margin: theme.spacing(0),
+      },
+      footer: {
+        color: theme.palette.grey[greyNum],
+        fontSize: 12,
+        textAlign: 'center',
+        padding: theme.spacing(0),
+        margin: theme.spacing(0),
       },
     }),
   )(TableCell);
 };
 
-const styledButton = (date?: Date, today?: Date) => {
-  const greyNum =
-    date && today ? (date.getMonth() === today.getMonth() ? 600 : 400) : 600;
+const styledButton = (day: Date, date: Date) => {
+  const today = new Date();
+  const isToday =
+    day.getFullYear() === today.getFullYear() &&
+    day.getMonth() === today.getMonth() &&
+    day.getDate() === today.getDate();
+
+  const isThisMonth = day.getMonth() === date.getMonth();
 
   return withStyles((theme: Theme) =>
-    createStyles({
-      root: {
-        color: theme.palette.grey[greyNum],
-        fontSize: 12,
-        textAlign: 'center',
-        padding: theme.spacing(2),
-      },
-    }),
+    isToday
+      ? createStyles({
+          root: {
+            fontSize: 12,
+            color: theme.palette.common.white,
+            background: theme.palette.primary.light,
+            minWidth: '30px',
+            maxWidth: '30px',
+            minHeight: '30px',
+            maxHeigth: '30px',
+            padding: theme.spacing(0),
+            margin: theme.spacing(0),
+            textAlign: 'center',
+          },
+        })
+      : isThisMonth
+      ? createStyles({
+          root: {
+            fontSize: 12,
+            color: theme.palette.primary.main,
+            minWidth: '30px',
+            maxWidth: '30px',
+            minHeight: '30px',
+            maxHeigth: '30px',
+            padding: theme.spacing(0),
+            margin: theme.spacing(0),
+            textAlign: 'center',
+          },
+        })
+      : createStyles({
+          root: {
+            fontSize: 12,
+            color: theme.palette.action.disabled,
+            minWidth: '30px',
+            maxWidth: '30px',
+            minHeight: '30px',
+            maxHeigth: '30px',
+            padding: theme.spacing(0),
+            margin: theme.spacing(0),
+            textAlign: 'center',
+          },
+        }),
   )(Button);
 };
 
@@ -66,31 +121,18 @@ const StyledTableRow = withStyles((theme: Theme) =>
     root: {
       '&:nth-of-type(odd)': {
         backgroundColor: theme.palette.action.hover,
+        padding: theme.spacing(0),
+        margin: theme.spacing(0),
       },
     },
   }),
 )(TableRow);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    table: {
-      minWidth: 300,
-      width: 400,
-    },
-    small: {
-      padding: theme.spacing(0),
-      width: theme.spacing(3),
-      height: theme.spacing(3),
-      fontSize: 14,
-      textAlign: 'center',
-      backgroundColor: 'royalblue',
-    },
-  }),
-);
-
 interface Props {
   calendarArr: Date[][];
   date: Date;
+  weekPlans: Date[],
+  selectDate: (date: Date) => void;
   calendarIncrement: () => void;
   calendarDecrement: () => void;
   reset: () => void;
@@ -99,22 +141,18 @@ interface Props {
 const Calendar: FC<Props> = ({
   calendarArr,
   date = new Date(),
+  selectDate,
   calendarIncrement,
   calendarDecrement,
   reset,
 }) => {
-  const classes = useStyles();
+  const StyledTableCell = styledTableCell();
 
   return (
-    <Table
-      className={classes.table}
-      aria-label="customized table"
-      component={Paper}
-    >
+    <Table style={{ minWidth: '250px', maxWidth: '250px' }} component={Paper}>
       <TableHead>
         <TableRow>
           {WEEKDAYS.map((wd) => {
-            const StyledTableCell = styledTableCell();
             return <StyledTableCell>{wd.type}</StyledTableCell>;
           })}
         </TableRow>
@@ -123,11 +161,12 @@ const Calendar: FC<Props> = ({
         {calendarArr.map((week) => (
           <StyledTableRow>
             {week.map((day) => {
+              day.setMonth(day.getMonth() + 1)
               const StyledTableCell = styledTableCell(day, date);
               const StyledButton = styledButton(day, date);
               return (
                 <StyledTableCell key={day.toString()}>
-                  <StyledButton>{day.getDate()}</StyledButton>
+                  <StyledButton onClick={() => selectDate(day)}>{day.getDate()}</StyledButton>
                 </StyledTableCell>
               );
             })}
@@ -136,26 +175,26 @@ const Calendar: FC<Props> = ({
       </TableBody>
       <TableFooter>
         <TableRow>
-          <TableCell colSpan={3}>
-            <Button variant="outlined" onClick={() => reset()}>
+          <StyledTableCell colSpan={3}>
+            <Button variant="text" onClick={() => reset()}>
               今月
             </Button>
-          </TableCell>
-          <TableCell>
+          </StyledTableCell>
+          <StyledTableCell>
             <IconButton size="small" onClick={() => calendarDecrement()}>
               <KeyboardArrowLeftRounded />
             </IconButton>
-          </TableCell>
-          <TableCell colSpan={2} align="center">
+          </StyledTableCell>
+          <StyledTableCell colSpan={2} align="center">
             <Typography component="h3">
               {`${date.getFullYear()}/${date.getMonth() + 1}`}
             </Typography>
-          </TableCell>
-          <TableCell>
+          </StyledTableCell>
+          <StyledTableCell>
             <IconButton size="small" onClick={() => calendarIncrement()}>
               <KeyboardArrowRightRounded />
             </IconButton>
-          </TableCell>
+          </StyledTableCell>
         </TableRow>
       </TableFooter>
     </Table>

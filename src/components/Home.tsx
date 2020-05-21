@@ -1,19 +1,26 @@
-import React,{ FC } from "react";
-import { Container, Grid } from "@material-ui/core";
+import React, { FC } from 'react';
+import {
+  Container,
+  Grid,
+  makeStyles,
+  Theme,
+  createStyles,
+} from '@material-ui/core';
 // import {  } from "@material-ui/icons";
-import Header from "./Header";
-import CalendarContainer from "../containers/Calendar";
+import Header from './Header';
+import CalendarContainer from '../containers/Calendar';
 
 const Home: FC = () => {
   return (
     <>
-      <Container maxWidth="sm">
-        <Header />
-        <Grid container>
-          <Grid item xs><CalendarContainer /></Grid>
-          <Grid item xs={8}></Grid>
+      <Header />
+
+      <Grid container direction="row">
+        <Grid item xs={4} style={{padding: '40px'}}>
+          <CalendarContainer />
         </Grid>
-      </Container>
+        <Grid item xs={8}></Grid>
+      </Grid>
     </>
   );
 };
