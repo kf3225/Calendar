@@ -1,5 +1,4 @@
 import React, { FC, useState, useEffect } from 'react';
-import { Dispatch } from 'redux';
 import _ from 'lodash';
 import { WEEKDAYS } from '../constants/Week';
 import CalendarComponent from '../components/Calendar';
@@ -7,22 +6,27 @@ import CalendarComponent from '../components/Calendar';
 const useCalendarInfo = (
   today: Date,
   initialCalendarArr: Date[][],
-): [Date[][], Date, Date, (date: Date) => void, () => void, () => void, () => void] => {
+): [
+  Date[][],
+  Date,
+  Date,
+  (date: Date) => void,
+  () => (num: number) => void,
+  () => void,
+] => {
   const [date, setDate] = useState(today);
   const [calendarArr, setCalendar] = useState(initialCalendarArr);
-  const [WeekPlans, setWeekPlans] = useState(getWeekPlans(today));
+  const [weekPlans, setWeekPlans] = useState(getWeekPlans(today));
   const [selectedDate, setSelectedDate] = useState(today);
 
-  const calendarIncrement = () =>
-    setDate(
-      (prevDate) =>
-        new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1),
-    );
-  const calendarDecrement = () =>
-    setDate(
-      (prevDate) =>
-        new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1),
-    );
+  const goBackOrNextMonth = () => {
+    return (num: number) => {
+      setDate(
+        (prevDate) =>
+          new Date(prevDate.getFullYear(), prevDate.getMonth() + num, 1),
+      );
+    };
+  };
 
   const selectDate = (selectedDate: Date) => setSelectedDate(selectedDate);
 
@@ -30,21 +34,20 @@ const useCalendarInfo = (
 
   useEffect(() => {
     const makeArr = () => {
+      console.log(date);
       const calendarArrByDate = createCalendarArray(date);
       setCalendar(calendarArrByDate);
     };
     makeArr();
-
-    setWeekPlans(getWeekPlans(selectedDate))
-  }, [date]);
+    setWeekPlans(getWeekPlans(selectedDate));
+  }, [date, selectedDate]);
 
   return [
     calendarArr,
     date,
     selectedDate,
     selectDate,
-    calendarIncrement,
-    calendarDecrement,
+    goBackOrNextMonth,
     reset,
   ];
 };
@@ -57,17 +60,16 @@ const CalendarContainer: FC = () => {
     date,
     selectedDate,
     selectDate,
-    calendarIncrement,
-    calendarDecrement,
+    goBackOrNextMonth,
     reset,
   ] = useCalendarInfo(today, initialCalendarArr);
   return (
     <CalendarComponent
       calendarArr={calendarArr}
       date={date}
+      selectedeDate={selectedDate}
       selectDate={selectDate}
-      calendarIncrement={calendarIncrement}
-      calendarDecrement={calendarDecrement}
+      goBackOrNextMonth={goBackOrNextMonth}
       reset={reset}
     />
   );
@@ -98,7 +100,7 @@ const createCalendarArray = (date: Date) => {
 
 const getWeekPlans = (date: Date): Date[] => {
   const baseDate = _.cloneDeep(date);
-  baseDate.setMonth(baseDate.getMonth() + 1);
+  baseDate.setMonth(baseDate.getMonth());
 
   const settingDate = (date: Date) => (num: number): Date => {
     const cpDate = _.cloneDeep(date);

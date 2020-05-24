@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import {
   Theme,
   createStyles,
@@ -12,7 +12,6 @@ import {
   Typography,
   IconButton,
   TableFooter,
-  makeStyles,
   Button,
   ThemeProvider,
 } from '@material-ui/core';
@@ -131,10 +130,9 @@ const StyledTableRow = withStyles((theme: Theme) =>
 interface Props {
   calendarArr: Date[][];
   date: Date;
-  weekPlans: Date[],
-  selectDate: (date: Date) => void;
-  calendarIncrement: () => void;
-  calendarDecrement: () => void;
+  selectedeDate: Date;
+  selectDate: (day: Date) => void;
+  goBackOrNextMonth: () => (num: number) => void;
   reset: () => void;
 }
 
@@ -142,8 +140,7 @@ const Calendar: FC<Props> = ({
   calendarArr,
   date = new Date(),
   selectDate,
-  calendarIncrement,
-  calendarDecrement,
+  goBackOrNextMonth,
   reset,
 }) => {
   const StyledTableCell = styledTableCell();
@@ -161,12 +158,14 @@ const Calendar: FC<Props> = ({
         {calendarArr.map((week) => (
           <StyledTableRow>
             {week.map((day) => {
-              day.setMonth(day.getMonth() + 1)
+              day.setMonth(day.getMonth());
               const StyledTableCell = styledTableCell(day, date);
               const StyledButton = styledButton(day, date);
               return (
                 <StyledTableCell key={day.toString()}>
-                  <StyledButton onClick={() => selectDate(day)}>{day.getDate()}</StyledButton>
+                  <StyledButton onClick={() => selectDate(day)}>
+                    {day.getDate()}
+                  </StyledButton>
                 </StyledTableCell>
               );
             })}
@@ -181,7 +180,7 @@ const Calendar: FC<Props> = ({
             </Button>
           </StyledTableCell>
           <StyledTableCell>
-            <IconButton size="small" onClick={() => calendarDecrement()}>
+            <IconButton size="small" onClick={() => goBackOrNextMonth()(-1)}>
               <KeyboardArrowLeftRounded />
             </IconButton>
           </StyledTableCell>
@@ -191,7 +190,7 @@ const Calendar: FC<Props> = ({
             </Typography>
           </StyledTableCell>
           <StyledTableCell>
-            <IconButton size="small" onClick={() => calendarIncrement()}>
+            <IconButton size="small" onClick={() => goBackOrNextMonth()(1)}>
               <KeyboardArrowRightRounded />
             </IconButton>
           </StyledTableCell>
